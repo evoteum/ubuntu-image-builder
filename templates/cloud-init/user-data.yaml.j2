@@ -1,0 +1,27 @@
+#cloud-config
+hostname: {{ hostname }}
+manage_etc_hosts: true
+ssh_pwauth: true
+
+users:
+{% for user in users %}
+  - name: {{ user.name }}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+{% if user.groups %}
+    groups: [{{ user.groups | join(", ") }}]
+{% endif %}
+{% if user.ssh_keys %}
+    ssh_authorized_keys:
+{% for key in user.ssh_keys %}
+      - {{ key }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+package_update: true
+package_upgrade: true
+
+runcmd:
+  - hostnamectl set-hostname {{ hostname }}

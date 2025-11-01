@@ -35,6 +35,8 @@ Builds custom Ubuntu images with ubuntu-image and Python tooling
 [//]: # (Must not have its own title)
 [//]: # (A detailed description of the repo)
 
+Generates custom cloud-init configurations from YAML templates, then uses https://github.com/canonical/ubuntu-image to
+build unique images for each Ubuntu server.
 
 
 ## Table of Contents
@@ -55,15 +57,27 @@ Builds custom Ubuntu images with ubuntu-image and Python tooling
 1. [Contributing](#contributing)
 1. [License](#license)
 
-[//]: # (## Security)
+## Security
 [//]: # (OPTIONAL)
 [//]: # (May go here if it is important to highlight security concerns.)
 
+`ubuntu-image`
+[requires root privileges](https://github.com/canonical/ubuntu-image#:~:text=run%20it%20with%20root%20privileges), so
+`USER root` is intentionally included in the Containerfile.
 
-
-[//]: # (## Background)
+## Background
 [//]: # (OPTIONAL)
 [//]: # (Explain the motivation and abstract dependencies for this repo)
+
+Since we run hardware nodes, we cannot escape some level of "metal pets". We have, however, aimed to make nodes as
+expendable and rebuildable as possible.
+
+Although NixOS provides a delightful level of repeatability, it still suffers from the first boot problem; you need to
+tell it what hostname and IP address to operate on at first boot, before a flake has had a chance to run.
+
+Additionally, Ubuntu is still the most popular server distro across the industry, so we chose to stick with Ubuntu.
+
+This reads the metal config from [estate-config/metal/config.yaml](https://github.com/evoteum/estate-config/blob/69096ce1533c2a27d0acf961158f09885acc0f5a/metal/config.yaml)
 
 ## Install
 
@@ -71,12 +85,50 @@ Builds custom Ubuntu images with ubuntu-image and Python tooling
 [//]: # (OPTIONAL IF documentation repo)
 [//]: # (ELSE REQUIRED)
 
+Nothing to install, just pull the container.
 
 
 ## Usage
 [//]: # (REQUIRED)
 [//]: # (Explain what the thing does. Use screenshots and/or videos.)
 
+
+### 0. Ensure config is correct
+
+Check [estate-config/metal/config.yaml](https://github.com/evoteum/estate-config/blob/69096ce1533c2a27d0acf961158f09885acc0f5a/metal/config.yaml)
+to ensure that,
+- your username is correct
+- your public ssh key is correct
+- the host(s) you need to image are present and correct.
+
+### 1. Building Operating System Images
+
+To build all images, run
+
+```shell
+podman run --rm -it \
+  -v "$PWD/estate-config/metal/config.yaml:/workspace/config.yaml" \
+  -v "$PWD/templates:/workspace/templates" \
+  -v "$PWD/output:/workspace/output" \
+  ubuntu-image-builder \
+  --config /workspace/config.yaml --dry-run --fleet lab
+```
+
+
+
+To build a single image,
+- note the ID of the node you wish to rebuild.
+- ensure its entry in [ubuntu-image/config.yaml](ubuntu-image/build_images.py) is correct.
+- run `python3 ubuntu-image/build_images.py --id [node id]`
+
+### 2. Get the image on to the box
+
+How you do this will depend on the model of the node. For example, if it is a Raspberry Pi, you can use the Raspberry Pi
+Imager to flash the NVMe drive.
+
+### 3. Rack the box
+
+Because we are not animals.
 
 
 [//]: # (Extra sections)
