@@ -37,11 +37,12 @@ Builds custom Ubuntu images with ubuntu-image and Python tooling
 
 > [!IMPORTANT]
 > **Failed Experiment**
-> We were unable to persuade ununtu-image to work, even with the example image definition provided in the 
+> 
+> We were unable to persuade ubuntu-image to work, even with the example image definition provided in the 
 > documentation.
 > 
-> Even if we had managed to make it work, it would still have required manually imaging all hosts, which is a pain. 
-> We decided to use [Tinkerbell](https://tinkerbell.org/) instead.
+> Even if we had managed to make it work, this approach would still have required manually imaging all hosts, which 
+> is a pain. We decided to use [Tinkerbell](https://tinkerbell.org/) instead.
 > 
 > This repo is left in place because failure is a better teacher than success.
 
